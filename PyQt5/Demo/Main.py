@@ -34,13 +34,11 @@ import pickle
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import label_binarize
+from sklearn.metrics import mean_squared_error, r2_score
 
 # Libraries to display decision tree
 from pydotplus import graph_from_dot_data
@@ -101,97 +99,34 @@ class RandomForest(QMainWindow):
         self.groupBox1Layout= QGridLayout()   # Grid
         self.groupBox1.setLayout(self.groupBox1Layout)
 
-        # # We create a checkbox of each Features
-        # self.feature0 = QCheckBox(features_list[0],self)
-        # self.feature1 = QCheckBox(features_list[1],self)
-        # self.feature2 = QCheckBox(features_list[2], self)
-        # self.feature3 = QCheckBox(features_list[3], self)
-        # self.feature4 = QCheckBox(features_list[4],self)
-        # self.feature5 = QCheckBox(features_list[5],self)
-        # self.feature6 = QCheckBox(features_list[6], self)
-        # self.feature7 = QCheckBox(features_list[7], self)
-        # self.feature0.setChecked(True)
-        # self.feature1.setChecked(True)
-        # self.feature2.setChecked(True)
-        # self.feature3.setChecked(True)
-        # self.feature4.setChecked(True)
-        # self.feature5.setChecked(True)
-        # self.feature6.setChecked(True)
-        # self.feature7.setChecked(True)
-        #
-        # self.lblPercentTest = QLabel('Percentage for Test :')
-        # self.lblPercentTest.adjustSize()
-        #
-        # self.txtPercentTest = QLineEdit(self)
-        # self.txtPercentTest.setText("30")
-
         self.btnExecute = QPushButton("Execute RF")
         self.btnExecute.clicked.connect(self.update)
 
-        # self.groupBox1Layout.addWidget(self.feature0,0,0)
-        # self.groupBox1Layout.addWidget(self.feature1,0,1)
-        # self.groupBox1Layout.addWidget(self.feature2,1,0)
-        # self.groupBox1Layout.addWidget(self.feature3,1,1)
-        # self.groupBox1Layout.addWidget(self.feature4,2,0)
-        # self.groupBox1Layout.addWidget(self.feature5,2,1)
-        # self.groupBox1Layout.addWidget(self.feature6,3,0)
-        # self.groupBox1Layout.addWidget(self.feature7,3,1)
-        # self.groupBox1Layout.addWidget(self.lblPercentTest,4,0)
-        # self.groupBox1Layout.addWidget(self.txtPercentTest,4,1)
         self.groupBox1Layout.addWidget(self.btnExecute,5,0)
 
         self.groupBox2 = QGroupBox('Results from the model')
         self.groupBox2Layout = QVBoxLayout()
         self.groupBox2.setLayout(self.groupBox2Layout)
 
-        self.lblResults = QLabel('Results:')
-        self.lblResults.adjustSize()
-        self.txtResults = QPlainTextEdit()
-        self.lblAccuracy = QLabel('Accuracy:')
-        self.txtAccuracy = QLineEdit()
 
-        self.groupBox2Layout.addWidget(self.lblResults)
-        self.groupBox2Layout.addWidget(self.txtResults)
-        self.groupBox2Layout.addWidget(self.lblAccuracy)
-        self.groupBox2Layout.addWidget(self.txtAccuracy)
+        self.lblMSE = QLabel('Mean Square Value:')
+        self.txtMSE = QLineEdit()
 
-        #::--------------------------------------
-        # Graphic 1 : Confusion Matrix
-        #::--------------------------------------
+        self.lblTRV = QLabel('Training R-square value:')
+        self.txtTRV = QLineEdit()
 
-        # self.fig = Figure()
-        # self.ax1 = self.fig.add_subplot(111)
-        # self.axes=[self.ax1]
-        # self.canvas = FigureCanvas(self.fig)
-        #
-        # self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        #
-        # self.canvas.updateGeometry()
-        #
-        # self.groupBoxG1 = QGroupBox('Confusion Matrix')
-        # self.groupBoxG1Layout= QVBoxLayout()
-        # self.groupBoxG1.setLayout(self.groupBoxG1Layout)
-        #
-        # self.groupBoxG1Layout.addWidget(self.canvas)
+        self.lblTSV = QLabel('TR-Square Value:')
+        self.txtTSV = QLineEdit()
 
-        #::---------------------------------------
-        # Graphic 2 : ROC Curve
-        #::---------------------------------------
+        self.groupBox2Layout.addWidget(self.lblMSE)
+        self.groupBox2Layout.addWidget(self.txtMSE)
 
-        # self.fig2 = Figure()
-        # self.ax2 = self.fig2.add_subplot(111)
-        # self.axes2 = [self.ax2]
-        # self.canvas2 = FigureCanvas(self.fig2)
-        #
-        # self.canvas2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        #
-        # self.canvas2.updateGeometry()
-        #
-        # self.groupBoxG2 = QGroupBox('ROC Curve')
-        # self.groupBoxG2Layout = QVBoxLayout()
-        # self.groupBoxG2.setLayout(self.groupBoxG2Layout)
-        #
-        # self.groupBoxG2Layout.addWidget(self.canvas2)
+        self.groupBox2Layout.addWidget(self.lblTRV)
+        self.groupBox2Layout.addWidget(self.txtTRV)
+
+        self.groupBox2Layout.addWidget(self.lblTSV)
+        self.groupBox2Layout.addWidget(self.txtTSV)
+
 
         #::-------------------------------------------
         # Graphic 3 : Importance of Features
@@ -210,24 +145,6 @@ class RandomForest(QMainWindow):
         self.groupBoxG3Layout = QVBoxLayout()
         self.groupBoxG3.setLayout(self.groupBoxG3Layout)
         self.groupBoxG3Layout.addWidget(self.canvas3)
-
-        #::--------------------------------------------
-        # Graphic 4 : ROC Curve by class
-        #::--------------------------------------------
-
-        # self.fig4 = Figure()
-        # self.ax4 = self.fig4.add_subplot(111)
-        # self.axes4 = [self.ax4]
-        # self.canvas4 = FigureCanvas(self.fig4)
-        #
-        # self.canvas4.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        #
-        # self.canvas4.updateGeometry()
-        #
-        # self.groupBoxG4 = QGroupBox('ROC Curve by Class')
-        # self.groupBoxG4Layout = QVBoxLayout()
-        # self.groupBoxG4.setLayout(self.groupBoxG4Layout)
-        # self.groupBoxG4Layout.addWidget(self.canvas4)
 
         #::-------------------------------------------------
         # End of graphs
@@ -254,77 +171,52 @@ class RandomForest(QMainWindow):
         '''
 
 
-        # Clear the graphs to populate them with the new information
-
-        # self.ax1.clear()
-        # self.ax2.clear()
-        # self.ax3.clear()
-        # self.ax4.clear()
-        # self.txtResults.clear()
-        # self.txtResults.setUndoRedoEnabled(False)
-
-        # vtest_per = vtest_per / 100
-
         # Assign the X and y to run the Random Forest Classifier
 
-        X_dt = df_train.loc[:, ~df_train.columns.isin(['DAMAGE_PROPERTY'])]
-        y_dt = df_train['DAMAGE_PROPERTY']
+        X_dt = df_train.loc[:, ~df_train.columns.isin(['TOTAL_DAMAGE', 'YEAR'])]
+        y_dt = df_train['TOTAL_DAMAGE']
 
         class_le = LabelEncoder()
-
-        # fit and transform the class
-
-        # y_dt = class_le.fit_transform(y_dt)
 
         # split the dataset into train and test
 
         X_train, X_test, y_train, y_test = train_test_split(X_dt, y_dt, test_size=0.3, random_state=100)
 
-        # perform training with entropy.
-        # Decision tree with entropy
-
-        #specify random forest classifier
-        # self.clf_rf = RandomForestClassifier(n_estimators=100, random_state=100)
-
-        # perform training
-        # self.clf_rf.fit(X_train, y_train)
 
         #-----------------------------------------------------------------------
 
         # predicton on test using all features
         y_pred = loaded_model_rf.predict(X_test)
-        # y_pred_score = self.clf_rf.predict_proba(X_test)
 
 
-        # confusion matrix for RandomForest
-        # conf_matrix = confusion_matrix(y_test, y_pred)
+        self.ff_mse = mean_squared_error(y_pred,y_test)
+        self.txtMSE.setText(str(self.ff_mse))
 
-        # clasification report
+        self.ff_trv = (loaded_model_rf.score(X_train, y_train)*100)
+        self.txtTRV.setText(str(self.ff_trv))
 
-        self.ff_class_rep = classification_report(y_test, y_pred)
-        self.txtResults.appendPlainText(self.ff_class_rep)
+        self.ff_tsv = (r2_score(y_test, y_pred) * 100)
+        self.txtTSV.setText(str(self.ff_tsv))
 
-        # accuracy score
-
-        self.ff_accuracy_score = mean_squared_error(y_pred,y_test)
-        self.txtAccuracy.setText(str(self.ff_accuracy_score))
 
         ######################################
         # Graph - 3 Feature Importances
         #####################################
-        # get feature importances
-        importances = loaded_model_rf.feature_importances_
 
-        # convert the importances into one-dimensional 1darray with corresponding df column names as axis labels
-        f_importances = pd.Series(importances, self.list_corr_features.columns)
+        feature_importance = np.array(loaded_model_rf.feature_importances_)
+        feature_names = np.array(X_train.columns)
 
-        # sort the array in descending order of the importances
-        f_importances.sort_values(ascending=False, inplace=True)
+        # Create a DataFrame using a Dictionary
+        data = {'feature_names': feature_names, 'feature_importance': feature_importance}
+        fi_df = pd.DataFrame(data)
 
-        X_Features = f_importances.index
-        y_Importance = list(f_importances)
+        # Sort the DataFrame in order decreasing feature importance
+        fi_df.sort_values(by=['feature_importance'], ascending=False, inplace=True)
 
-        self.ax3.barh(X_Features, y_Importance )
+        X_Features = fi_df.feature_importance[:15]
+        y_Importance = fi_df.feature_names[:15]
+
+        self.ax3.barh(y_Importance,X_Features )
         self.ax3.set_aspect('auto')
 
         # show the plot
@@ -332,8 +224,7 @@ class RandomForest(QMainWindow):
         self.fig3.canvas.draw_idle()
 
 
-
-class DecisionTree(QMainWindow):
+class XGBoost(QMainWindow):
     #::----------------------
     # Implementation of Decision Tree Algorithm using the happiness dataset
     # the methods in this class are
@@ -347,9 +238,9 @@ class DecisionTree(QMainWindow):
     send_fig = pyqtSignal(str)
 
     def __init__(self):
-        super(DecisionTree, self).__init__()
+        super(XGBoost, self).__init__()
 
-        self.Title ="Decision Tree Classifier"
+        self.Title ="XGBoost"
         self.initUi()
 
     def initUi(self):
@@ -367,120 +258,43 @@ class DecisionTree(QMainWindow):
 
         self.layout = QGridLayout(self.main_widget)
 
-        self.groupBox1 = QGroupBox('ML Decision Tree Features')
+        self.groupBox1 = QGroupBox('XGBoost')
         self.groupBox1Layout= QGridLayout()
         self.groupBox1.setLayout(self.groupBox1Layout)
 
-        self.feature0 = QCheckBox(features_list[0],self)
-        self.feature1 = QCheckBox(features_list[1],self)
-        self.feature2 = QCheckBox(features_list[2], self)
-        self.feature3 = QCheckBox(features_list[3], self)
-        self.feature4 = QCheckBox(features_list[4],self)
-        self.feature5 = QCheckBox(features_list[5],self)
-        self.feature6 = QCheckBox(features_list[6], self)
-        self.feature7 = QCheckBox(features_list[7], self)
-        self.feature0.setChecked(True)
-        self.feature1.setChecked(True)
-        self.feature2.setChecked(True)
-        self.feature3.setChecked(True)
-        self.feature4.setChecked(True)
-        self.feature5.setChecked(True)
-        self.feature6.setChecked(True)
-        self.feature7.setChecked(True)
-
-        self.lblPercentTest = QLabel('Percentage for Test :')
-        self.lblPercentTest.adjustSize()
-
-        self.txtPercentTest = QLineEdit(self)
-        self.txtPercentTest.setText("30")
-
-        self.lblMaxDepth = QLabel('Maximun Depth :')
-        self.txtMaxDepth = QLineEdit(self)
-        self.txtMaxDepth.setText("3")
-
-        self.btnExecute = QPushButton("Execute DT")
+        self.btnExecute = QPushButton("Execute XGBoost")
         self.btnExecute.clicked.connect(self.update)
 
-        self.btnDTFigure = QPushButton("View Tree")
-        self.btnDTFigure.clicked.connect(self.view_tree)
 
         # We create a checkbox for each feature
 
-        self.groupBox1Layout.addWidget(self.feature0,0,0)
-        self.groupBox1Layout.addWidget(self.feature1,0,1)
-        self.groupBox1Layout.addWidget(self.feature2,1,0)
-        self.groupBox1Layout.addWidget(self.feature3,1,1)
-        self.groupBox1Layout.addWidget(self.feature4,2,0)
-        self.groupBox1Layout.addWidget(self.feature5,2,1)
-        self.groupBox1Layout.addWidget(self.feature6,3,0)
-        self.groupBox1Layout.addWidget(self.feature7,3,1)
-        self.groupBox1Layout.addWidget(self.lblPercentTest,4,0)
-        self.groupBox1Layout.addWidget(self.txtPercentTest,4,1)
-        self.groupBox1Layout.addWidget(self.lblMaxDepth,5,0)
-        self.groupBox1Layout.addWidget(self.txtMaxDepth,5,1)
         self.groupBox1Layout.addWidget(self.btnExecute,6,0)
-        self.groupBox1Layout.addWidget(self.btnDTFigure,6,1)
 
         self.groupBox2 = QGroupBox('Results from the model')
         self.groupBox2Layout = QVBoxLayout()
         self.groupBox2.setLayout(self.groupBox2Layout)
 
-        self.lblResults = QLabel('Results:')
-        self.lblResults.adjustSize()
-        self.txtResults = QPlainTextEdit()
-        self.lblAccuracy = QLabel('Accuracy:')
-        self.txtAccuracy = QLineEdit()
+        self.lblMSE = QLabel('Mean Square Value:')
+        self.txtMSE = QLineEdit()
 
-        self.groupBox2Layout.addWidget(self.lblResults)
-        self.groupBox2Layout.addWidget(self.txtResults)
-        self.groupBox2Layout.addWidget(self.lblAccuracy)
-        self.groupBox2Layout.addWidget(self.txtAccuracy)
+        self.lblTRV = QLabel('Training R-square value:')
+        self.txtTRV = QLineEdit()
 
-        #::-------------------------------------
-        # Graphic 1 : Confusion Matrix
-        #::-------------------------------------
+        self.lblTSV = QLabel('TR-Square Value:')
+        self.txtTSV = QLineEdit()
 
-        self.fig = Figure()
-        self.ax1 = self.fig.add_subplot(111)
-        self.axes=[self.ax1]
-        self.canvas = FigureCanvas(self.fig)
+        self.groupBox2Layout.addWidget(self.lblMSE)
+        self.groupBox2Layout.addWidget(self.txtMSE)
 
-        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.groupBox2Layout.addWidget(self.lblTRV)
+        self.groupBox2Layout.addWidget(self.txtTRV)
 
-        self.canvas.updateGeometry()
+        self.groupBox2Layout.addWidget(self.lblTSV)
+        self.groupBox2Layout.addWidget(self.txtTSV)
 
-        self.groupBoxG1 = QGroupBox('Confusion Matrix')
-        self.groupBoxG1Layout= QVBoxLayout()
-        self.groupBoxG1.setLayout(self.groupBoxG1Layout)
-
-        self.groupBoxG1Layout.addWidget(self.canvas)
-
-        #::--------------------------------------------
-        ## End Graph1
-        #::--------------------------------------------
-
-        #::---------------------------------------------
-        # Graphic 2 : ROC Curve
-        #::---------------------------------------------
-
-        self.fig2 = Figure()
-        self.ax2 = self.fig2.add_subplot(111)
-        self.axes2 = [self.ax2]
-        self.canvas2 = FigureCanvas(self.fig2)
-
-        self.canvas2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        self.canvas2.updateGeometry()
-
-        self.groupBoxG2 = QGroupBox('ROC Curve')
-        self.groupBoxG2Layout = QVBoxLayout()
-        self.groupBoxG2.setLayout(self.groupBoxG2Layout)
-
-        self.groupBoxG2Layout.addWidget(self.canvas2)
-
-        #::---------------------------------------------------
-        # Graphic 3 : ROC Curve by Class
-        #::---------------------------------------------------
+        #::-------------------------------------------
+        # Graphic 3 : Importance of Features
+        #::-------------------------------------------
 
         self.fig3 = Figure()
         self.ax3 = self.fig3.add_subplot(111)
@@ -491,19 +305,21 @@ class DecisionTree(QMainWindow):
 
         self.canvas3.updateGeometry()
 
-        self.groupBoxG3 = QGroupBox('ROC Curve by Class')
+        self.groupBoxG3 = QGroupBox('Importance of Features')
         self.groupBoxG3Layout = QVBoxLayout()
         self.groupBoxG3.setLayout(self.groupBoxG3Layout)
-
         self.groupBoxG3Layout.addWidget(self.canvas3)
 
-        ## End of elements o the dashboard
+        #::-------------------------------------------------
+        # End of graphs
+        #::-------------------------------------------------
 
-        self.layout.addWidget(self.groupBox1,0,0)
-        self.layout.addWidget(self.groupBoxG1,0,1)
-        self.layout.addWidget(self.groupBox2,0,2)
-        self.layout.addWidget(self.groupBoxG2,1,1)
-        self.layout.addWidget(self.groupBoxG3,1,2)
+        self.layout.addWidget(self.groupBox1, 0, 0)
+        # self.layout.addWidget(self.groupBoxG1,0,1)
+        self.layout.addWidget(self.groupBox2, 0, 2)
+        # self.layout.addWidget(self.groupBoxG2,1,1)
+        self.layout.addWidget(self.groupBoxG3, 0, 1)
+        # self.layout.addWidget(self.groupBoxG4,1,2)
 
         self.setCentralWidget(self.main_widget)
         self.resize(1100, 700)
@@ -520,201 +336,53 @@ class DecisionTree(QMainWindow):
         '''
 
         # We process the parameters
-        self.list_corr_features = pd.DataFrame([])
-        if self.feature0.isChecked():
-            if len(self.list_corr_features)==0:
-                self.list_corr_features = ff_noaa[features_list[0]]
-            else:
-                self.list_corr_features = pd.concat([self.list_corr_features, ff_noaa[features_list[0]]],axis=1)
 
-        if self.feature1.isChecked():
-            if len(self.list_corr_features) == 0:
-                self.list_corr_features = ff_noaa[features_list[1]]
-            else:
-                self.list_corr_features = pd.concat([self.list_corr_features, ff_noaa[features_list[1]]],axis=1)
+        # Assign the X and y to run the Random Forest Classifier
 
-        if self.feature2.isChecked():
-            if len(self.list_corr_features) == 0:
-                self.list_corr_features = ff_noaa[features_list[2]]
-            else:
-                self.list_corr_features = pd.concat([self.list_corr_features, ff_noaa[features_list[2]]],axis=1)
-
-        if self.feature3.isChecked():
-            if len(self.list_corr_features) == 0:
-                self.list_corr_features = ff_noaa[features_list[3]]
-            else:
-                self.list_corr_features = pd.concat([self.list_corr_features, ff_noaa[features_list[3]]],axis=1)
-
-        if self.feature4.isChecked():
-            if len(self.list_corr_features) == 0:
-                self.list_corr_features = ff_noaa[features_list[4]]
-            else:
-                self.list_corr_features = pd.concat([self.list_corr_features, ff_noaa[features_list[4]]],axis=1)
-
-        if self.feature5.isChecked():
-            if len(self.list_corr_features) == 0:
-                self.list_corr_features = ff_noaa[features_list[5]]
-            else:
-                self.list_corr_features = pd.concat([self.list_corr_features, ff_noaa[features_list[5]]],axis=1)
-
-        if self.feature6.isChecked():
-            if len(self.list_corr_features) == 0:
-                self.list_corr_features = ff_noaa[features_list[6]]
-            else:
-                self.list_corr_features = pd.concat([self.list_corr_features, ff_noaa[features_list[6]]],axis=1)
-
-        if self.feature7.isChecked():
-            if len(self.list_corr_features) == 0:
-                self.list_corr_features = ff_noaa[features_list[7]]
-            else:
-                self.list_corr_features = pd.concat([self.list_corr_features, ff_noaa[features_list[7]]],axis=1)
-
-
-        vtest_per = float(self.txtPercentTest.text())
-        vmax_depth = float(self.txtMaxDepth.text())
-
-        self.ax1.clear()
-        self.ax2.clear()
-        self.ax3.clear()
-        self.txtResults.clear()
-        self.txtResults.setUndoRedoEnabled(False)
-
-        vtest_per = vtest_per / 100
-
-
-        # We assign the values to X and y to run the algorithm
-
-        X_dt =  self.list_corr_features
-        y_dt = ff_noaa["Happiness.Scale"]
+        X_dt = df_train.loc[:, ~df_train.columns.isin(['TOTAL_DAMAGE', 'YEAR'])]
+        y_dt = df_train['TOTAL_DAMAGE']
 
         class_le = LabelEncoder()
 
-        # fit and transform the class
-
-        y_dt = class_le.fit_transform(y_dt)
-
         # split the dataset into train and test
-        X_train, X_test, y_train, y_test = train_test_split(X_dt, y_dt, test_size=vtest_per, random_state=100)
-        # perform training with entropy.
-        # Decision tree with entropy
-        self.clf_entropy = DecisionTreeClassifier(criterion="entropy", random_state=100, max_depth=vmax_depth, min_samples_leaf=5)
 
-        # Performing training
-        self.clf_entropy.fit(X_train, y_train)
+        X_train, X_test, y_train, y_test = train_test_split(X_dt, y_dt, test_size=0.3, random_state=100)
 
-        # predicton on test using entropy
-        y_pred_entropy = self.clf_entropy.predict(X_test)
+        y_pred = loaded_model_xgb.predict(X_test)
 
-        # confusion matrix for entropy model
+        self.ff_mse = mean_squared_error(y_pred, y_test)
+        self.txtMSE.setText(str(self.ff_mse))
 
-        conf_matrix = confusion_matrix(y_test, y_pred_entropy)
+        self.ff_trv = (loaded_model_xgb.score(X_train, y_train) * 100)
+        self.txtTRV.setText(str(self.ff_trv))
 
-        # clasification report
+        self.ff_tsv = (r2_score(y_test, y_pred) * 100)
+        self.txtTSV.setText(str(self.ff_tsv))
 
-        self.ff_class_rep = classification_report(y_test, y_pred_entropy)
-        self.txtResults.appendPlainText(self.ff_class_rep)
+        ######################################
+        # Graph - 3 Feature Importances
+        #####################################
 
-        # accuracy score
+        feature_importance = np.array(loaded_model_xgb.feature_importances_)
+        feature_names = np.array(X_train.columns)
 
-        self.ff_accuracy_score = accuracy_score(y_test, y_pred_entropy) * 100
-        self.txtAccuracy.setText(str(self.ff_accuracy_score))
+        # Create a DataFrame using a Dictionary
+        data = {'feature_names': feature_names, 'feature_importance': feature_importance}
+        fi_df = pd.DataFrame(data)
 
+        # Sort the DataFrame in order decreasing feature importance
+        fi_df.sort_values(by=['feature_importance'], ascending=False, inplace=True)
 
-        #::----------------------------------------------------------------
-        # Graph1 -- Confusion Matrix
-        #::-----------------------------------------------------------------
+        X_Features = fi_df.feature_importance[:15]
+        y_Importance = fi_df.feature_names[:15]
 
-        self.ax1.set_xlabel('Predicted label')
-        self.ax1.set_ylabel('True label')
-
-        class_names1 = ['','Happy', 'Med.Happy', 'Low.Happy', 'Not.Happy']
-
-        self.ax1.matshow(conf_matrix, cmap= plt.cm.get_cmap('Blues', 14))
-        self.ax1.set_yticklabels(class_names1)
-        self.ax1.set_xticklabels(class_names1,rotation = 90)
-
-        for i in range(len(class_names)):
-            for j in range(len(class_names)):
-                y_pred_score = self.clf_entropy.predict_proba(X_test)
-                self.ax1.text(j, i, str(conf_matrix[i][j]))
-
-        self.fig.tight_layout()
-        self.fig.canvas.draw_idle()
-
-        #::-----------------------------------------------------
-        # End Graph 1 -- Confusioin Matrix
-        #::-----------------------------------------------------
-
-        #::-----------------------------------------------------
-        # Graph 2 -- ROC Cure
-        #::-----------------------------------------------------
-
-        y_test_bin = label_binarize(y_test, classes=[0, 1, 2, 3])
-        n_classes = y_test_bin.shape[1]
-
-        fpr = dict()
-        tpr = dict()
-        roc_auc = dict()
-        for i in range(n_classes):
-            fpr[i], tpr[i], _ = roc_curve(y_test_bin[:, i], y_pred_score[:, i])
-            roc_auc[i] = auc(fpr[i], tpr[i])
-
-        # Compute micro-average ROC curve and ROC area
-        fpr["micro"], tpr["micro"], _ = roc_curve(y_test_bin.ravel(), y_pred_score.ravel())
-
-        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
-
-        lw = 2
-        self.ax2.plot(fpr[2], tpr[2], color='darkorange',
-                 lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[2])
-        self.ax2.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-        self.ax2.set_xlim([0.0, 1.0])
-        self.ax2.set_ylim([0.0, 1.05])
-        self.ax2.set_xlabel('False Positive Rate')
-        self.ax2.set_ylabel('True Positive Rate')
-        self.ax2.set_title('ROC Curve Decision Tree')
-        self.ax2.legend(loc="lower right")
-
-        self.fig2.tight_layout()
-        self.fig2.canvas.draw_idle()
-
-        #::--------------------------------
-        ### Graph 3 Roc Curve by class
-        #::--------------------------------
-
-        str_classes= ['HP','MEH','LOH','NH']
-        colors = cycle(['magenta', 'darkorange', 'green', 'blue'])
-        for i, color in zip(range(n_classes), colors):
-            self.ax3.plot(fpr[i], tpr[i], color=color, lw=lw,
-                     label='{0} (area = {1:0.2f})'
-                           ''.format(str_classes[i], roc_auc[i]))
-
-        self.ax3.plot([0, 1], [0, 1], 'k--', lw=lw)
-        self.ax3.set_xlim([0.0, 1.0])
-        self.ax3.set_ylim([0.0, 1.05])
-        self.ax3.set_xlabel('False Positive Rate')
-        self.ax3.set_ylabel('True Positive Rate')
-        self.ax3.set_title('ROC Curve by Class')
-        self.ax3.legend(loc="lower right")
+        self.ax3.barh(y_Importance, X_Features)
+        self.ax3.set_aspect('auto')
 
         # show the plot
         self.fig3.tight_layout()
         self.fig3.canvas.draw_idle()
 
-
-    def view_tree(self):
-        '''
-        Executes the graphviz to create a tree view of the information
-         then it presents the graphic in a pdf formt using webbrowser
-        :return:None
-        '''
-        dot_data = export_graphviz(self.clf_entropy, filled=True, rounded=True, class_names=class_names,
-                                   feature_names=self.list_corr_features.columns, out_file=None)
-
-
-        graph = graph_from_dot_data(dot_data)
-        graph.write_pdf("decision_tree_entropy.pdf")
-        webbrowser.open_new(r'decision_tree_entropy.pdf')
 
 
 class CorrelationPlot(QMainWindow):
@@ -763,9 +431,6 @@ class CorrelationPlot(QMainWindow):
         self.feature7 = QCheckBox(features_list[7], self)
         self.feature8 = QCheckBox(features_list[8], self)
         self.feature9 = QCheckBox(features_list[9], self)
-        self.feature10 = QCheckBox(features_list[10], self)
-        self.feature11 = QCheckBox(features_list[11], self)
-        self.feature12 = QCheckBox(features_list[12], self)
         self.feature0.setChecked(True)
         self.feature1.setChecked(True)
         self.feature2.setChecked(True)
@@ -776,9 +441,6 @@ class CorrelationPlot(QMainWindow):
         self.feature7.setChecked(True)
         self.feature8.setChecked(True)
         self.feature9.setChecked(True)
-        self.feature10.setChecked(True)
-        self.feature11.setChecked(True)
-        self.feature12.setChecked(True)
 
         self.btnExecute = QPushButton("Create Plot")
         self.btnExecute.clicked.connect(self.update)
@@ -793,10 +455,7 @@ class CorrelationPlot(QMainWindow):
         self.groupBox1Layout.addWidget(self.feature7,1,3)
         self.groupBox1Layout.addWidget(self.feature8,2,0)
         self.groupBox1Layout.addWidget(self.feature9,2,1)
-        self.groupBox1Layout.addWidget(self.feature10,2,2)
-        self.groupBox1Layout.addWidget(self.feature11,2,3)
-        self.groupBox1Layout.addWidget(self.feature12,3,0)
-        self.groupBox1Layout.addWidget(self.btnExecute,3,1)
+        self.groupBox1Layout.addWidget(self.btnExecute,2,2)
 
 
         self.fig = Figure()
@@ -844,14 +503,14 @@ class CorrelationPlot(QMainWindow):
                 count = count + 1
             return dict
 
-        for i in ['MONTH_NAME', 'EVENT_TYPE', 'CZ_TYPE','FLOOD_CAUSE','STATE']:
+        for i in ["MAGNITUDE_TYPE", "EVENT_TYPE", "STATE","CZ_TIMEZONE","WINDY_EVENT","YEAR","MONTH_NAME",'CZ_NAME']:
             unique_tag = ff_noaa_cor[i].value_counts().keys().values
             dict_mapping = mapping(unique_tag)
             ff_noaa_cor[i] = ff_noaa_cor[i].map(lambda x: dict_mapping[x] if x in dict_mapping.keys() else -1)
 
-        X_1 = ff_noaa["DAMAGE_PROPERTY"]
+        X_1 = ff_noaa["TOTAL_DAMAGE"]
 
-        list_corr_features = pd.DataFrame(ff_noaa["DAMAGE_PROPERTY"])
+        list_corr_features = pd.DataFrame(ff_noaa["TOTAL_DAMAGE"])
         if self.feature0.isChecked():
             list_corr_features = pd.concat([list_corr_features, ff_noaa_cor[features_list[0]]],axis=1)
 
@@ -882,32 +541,12 @@ class CorrelationPlot(QMainWindow):
         if self.feature9.isChecked():
             list_corr_features = pd.concat([list_corr_features, ff_noaa_cor[features_list[9]]], axis=1)
 
-        if self.feature10.isChecked():
-            list_corr_features = pd.concat([list_corr_features, ff_noaa_cor[features_list[10]]], axis=1)
-
-        if self.feature11.isChecked():
-            list_corr_features = pd.concat([list_corr_features, ff_noaa_cor[features_list[11]]], axis=1)
-
-        if self.feature12.isChecked():
-            list_corr_features = pd.concat([list_corr_features, ff_noaa_cor[features_list[12]]], axis=1)
-
 
         vsticks = ["dummy"]
         vsticks1 = list(list_corr_features.columns)
         vsticks1 = vsticks + vsticks1
         res_corr = list_corr_features.corr(method ='kendall')
         self.ax1.matshow(res_corr, cmap= plt.cm.get_cmap('Blues', 14), interpolation='nearest')
-        # self.ax1.set_yticklabels(vsticks1)
-        # self.ax1.set_xticklabels(vsticks1,rotation = 90)
-        # # figure(figsize=(4, 4), dpi=80)
-        # self.ax1.xaxis.set_major_locator(ticker.MultipleLocator(1))
-        # self.ax1.yaxis.set_major_locator(ticker.MultipleLocator(1))
-        # if labels:
-        #     self.ax1.set_xticklabels([''] + vsticks1)
-        #     self.ax1.set_yticklabels([''] + vsticks1,rotation = 90)
-        #
-        # self.ax1.xaxis.set_major_locator(ticker.MultipleLocator(1))
-        # self.ax1.yaxis.set_major_locator(ticker.MultipleLocator(1))
         self.ax1.set_xticks(np.arange(len(vsticks1[1:])))
         self.ax1.set_yticks(np.arange(len(vsticks1[1:])))
         self.ax1.set_yticklabels(vsticks1[1:])
@@ -934,7 +573,7 @@ class DPGraphs(QMainWindow):
         #::--------------------------------------------------------
         super(DPGraphs, self).__init__()
 
-        self.Title = "Features vrs Damage_Property"
+        self.Title = "Features vrs TOTAL_DAMAGE"
         self.main_widget = QWidget(self)
 
         self.setWindowTitle(self.Title)
@@ -952,20 +591,19 @@ class DPGraphs(QMainWindow):
         self.canvas.updateGeometry()
 
         self.dropdown1 = QComboBox()
-        self.dropdown1.addItems(["DURATION_OF_STORM", "DAMAGE_CROPS", "MONTH_NAME", "CZ_TYPE",
-         "EVENT_TYPE", "DEATHS_DIRECT", "DEATHS_INDIRECT", "FLOOD_CAUSE","GEO_DISTANCE",
-        "INJURIES_DIRECT","INJURIES_INDIRECT","YEAR","STATE"])
+        self.dropdown1.addItems(["MAGNITUDE_TYPE", "WIND_SPEED", "EVENT_TYPE", "STATE",
+         "DURATION_OF_STORM", "CZ_TIMEZONE","WINDY_EVENT","YEAR","MONTH_NAME",'CZ_NAME'])
 
         self.dropdown1.currentIndexChanged.connect(self.update)
         self.label = QLabel("A plot:")
 
-        self.checkbox1 = QCheckBox('Show Regression Line', self)
-        self.checkbox1.stateChanged.connect(self.update)
+        # self.checkbox1 = QCheckBox('Show Regression Line', self)
+        # self.checkbox1.stateChanged.connect(self.update)
 
         self.layout = QGridLayout(self.main_widget)
         self.layout.addWidget(QLabel("Select Index for subplots"))
         self.layout.addWidget(self.dropdown1)
-        self.layout.addWidget(self.checkbox1)
+        # self.layout.addWidget(self.checkbox1)
         self.layout.addWidget(self.canvas)
 
         self.setCentralWidget(self.main_widget)
@@ -983,30 +621,32 @@ class DPGraphs(QMainWindow):
         self.ax1.clear()
         cat1 = self.dropdown1.currentText()
 
-        numerical_features = ["DURATION_OF_STORM", "DAMAGE_CROPS", "DEATHS_DIRECT", "DEATHS_INDIRECT", "GEO_DISTANCE",
-        "INJURIES_DIRECT","INJURIES_INDIRECT"]
+        numerical_features = ["WIND_SPEED", "DURATION_OF_STORM","WINDY_EVENT"]
 
         if cat1 in numerical_features:
 
-            X_1 = ff_noaa["DAMAGE_PROPERTY"]
+            X_1 = ff_noaa["TOTAL_DAMAGE"]
             y_1 = ff_noaa[cat1]
 
             X_1 = np.log(X_1)
 
-            if cat1 in ['DAMAGE_CROPS']:
-                y_1 = np.log(y_1)
+            # if cat1 in ['DAMAGE_CROPS']:
+            #     y_1 = np.log(y_1)
 
             self.ax1.scatter(X_1,y_1)
 
-            if self.checkbox1.isChecked():
+            # if self.checkbox1.isChecked():
+            #
+            #     X_1.dropna(inplace=True)
+            #     y_1.dropna(inplace=True)
+            #
+            #     b, m = polyfit(X_1, y_1, 1)
+            #
+            #     self.ax1.plot(X_1, b + m * X_1, '-', color="orange")
 
-                b, m = polyfit(X_1, y_1, 1)
-
-                self.ax1.plot(X_1, b + m * X_1, '-', color="orange")
-
-            vtitle = "Damage Property vrs "+ cat1
+            vtitle = "TOTAL_DAMAGE vrs "+ cat1
             self.ax1.set_title(vtitle)
-            self.ax1.set_xlabel("DAMAGE_PROPERTY")
+            self.ax1.set_xlabel("TOTAL_DAMAGE")
             self.ax1.set_ylabel(cat1)
             self.ax1.grid(True)
 
@@ -1015,18 +655,19 @@ class DPGraphs(QMainWindow):
 
         elif cat1 in ['MONTH_NAME','YEAR']:
 
-            df_1 = ff_noaa[[cat1, 'DAMAGE_PROPERTY']]
+            df_1 = ff_noaa[[cat1, 'TOTAL_DAMAGE']]
             df_1 = df_1.groupby(cat1).sum().reset_index()
-            df_1["DAMAGE_PROPERTY"] = np.log(df_1["DAMAGE_PROPERTY"])
-            X_1 = df_1["DAMAGE_PROPERTY"]
+            df_1["TOTAL_DAMAGE"] = np.log(df_1["TOTAL_DAMAGE"])
+            # df_1 = df_1.sort_values(by=['TOTAL_DAMAGE'], ascending=False)
+            X_1 = df_1["TOTAL_DAMAGE"]
             y_1 = df_1[cat1]
 
             self.ax1.plot(y_1, X_1)
 
-            vtitle = "DAMAGE_PROPERTY vrs " + cat1
+            vtitle = "TOTAL_DAMAGE vrs " + cat1
             self.ax1.set_title(vtitle)
             self.ax1.set_xlabel(cat1)
-            self.ax1.set_ylabel("DAMAGE_PROPERTY")
+            self.ax1.set_ylabel("TOTAL_DAMAGE")
             self.ax1.grid(True)
 
             self.fig.tight_layout()
@@ -1034,18 +675,19 @@ class DPGraphs(QMainWindow):
 
         else:
 
-            df_1 = ff_noaa[[cat1,'DAMAGE_PROPERTY']]
+            df_1 = ff_noaa[[cat1,'TOTAL_DAMAGE']]
             df_1 = df_1.groupby(cat1).sum().reset_index()
-            df_1["DAMAGE_PROPERTY"] = np.log(df_1["DAMAGE_PROPERTY"])
-            X_1 = df_1["DAMAGE_PROPERTY"]
-            y_1 = df_1[cat1]
+            df_1["TOTAL_DAMAGE"] = np.log(df_1["TOTAL_DAMAGE"])
+            df_1 = df_1.sort_values(by=['TOTAL_DAMAGE'],ascending=False)
+            X_1 = df_1["TOTAL_DAMAGE"][:10]
+            y_1 = df_1[cat1][:10]
 
             self.ax1.bar(x =  y_1, height = X_1)
 
-            vtitle = "DAMAGE_PROPERTY vrs " + cat1
+            vtitle = "TOTAL_DAMAGE vrs " + cat1
             self.ax1.set_title(vtitle)
             self.ax1.set_xlabel(cat1)
-            self.ax1.set_ylabel("DAMAGE_PROPERTY")
+            self.ax1.set_ylabel("TOTAL_DAMAGE")
             self.ax1.grid(True)
 
             self.fig.tight_layout()
@@ -1152,8 +794,8 @@ class App(QMainWindow):
         EDA1Button.triggered.connect(self.EDA1)
         EDAMenu.addAction(EDA1Button)
 
-        EDA2Button = QAction(QIcon('analysis.png'), 'Graphs wrt Damage Property', self)
-        EDA2Button.setStatusTip('Final Happiness Graph')
+        EDA2Button = QAction(QIcon('analysis.png'), 'Graphs wrt Total Damage', self)
+        EDA2Button.setStatusTip('Graphs wrt Total Damage')
         EDA2Button.triggered.connect(self.EDA2)
         EDAMenu.addAction(EDA2Button)
 
@@ -1165,14 +807,14 @@ class App(QMainWindow):
         #::--------------------------------------------------
         # ML Models for prediction
         # There are two models
-        #       Decision Tree
+        #       XGBoost
         #       Random Forest
         #::--------------------------------------------------
         # Decision Tree Model
         #::--------------------------------------------------
-        MLModel1Button =  QAction(QIcon(), 'Decision Tree Entropy', self)
-        MLModel1Button.setStatusTip('ML algorithm with Entropy ')
-        MLModel1Button.triggered.connect(self.MLDT)
+        MLModel1Button =  QAction(QIcon(), 'XGBoost', self)
+        MLModel1Button.setStatusTip('XGBoost ')
+        MLModel1Button.triggered.connect(self.XGBoost)
 
         #::------------------------------------------------------
         # Random Forest Classifier
@@ -1190,17 +832,19 @@ class App(QMainWindow):
         #::------------------------------------------------------
         # Creates the histogram
         # The X variable contains the happiness.score
-        # X was populated in the method data_happiness()
+        # X was populated in the method data_noaa()
         # at the start of the application
         #::------------------------------------------------------
         dialog = CanvasWindow(self)
         dialog.m.plot()
         x = (X - np.mean(X))/np.std(X)
-        dialog.m.ax.hist(X,bins = 10, density=True, facecolor='green', alpha=0.5)
+        dialog.m.ax.hist(x,bins = 5, density=True, facecolor='green')
         # dialog.m.ax.distplot(x)
-        dialog.m.ax.set_title('Density of Damage  Property')
-        dialog.m.ax.set_xlabel("Damage Property")
-        dialog.m.ax.set_ylabel("Dnnsity")
+        # dialog.m.ax.X.plot(kind="hist", density=True, bins=15)
+        # dialog.m.ax.X.plot(kind="kde")
+        dialog.m.ax.set_title('Density of Total Damage')
+        dialog.m.ax.set_xlabel("Total Damage")
+        dialog.m.ax.set_ylabel("Density")
         dialog.m.ax.grid(True)
         dialog.m.draw()
         self.dialogs.append(dialog)
@@ -1224,13 +868,13 @@ class App(QMainWindow):
         self.dialogs.append(dialog)
         dialog.show()
 
-    def MLDT(self):
+    def XGBoost(self):
         #::-----------------------------------------------------------
         # This function creates an instance of the DecisionTree class
         # This class presents a dashboard for a Decision Tree Algorithm
         # using the happiness dataset
         #::-----------------------------------------------------------
-        dialog = DecisionTree()
+        dialog = XGBoost()
         self.dialogs.append(dialog)
         dialog.show()
 
@@ -1254,7 +898,7 @@ def main():
     sys.exit(app.exec_())
 
 
-def data_happiness():
+def data_noaa():
     #::--------------------------------------------------
     # Loads the dataset 2017.csv ( Index of happiness and esplanatory variables original dataset)
     # Loads the dataset final_happiness_dataset (index of happiness
@@ -1269,24 +913,19 @@ def data_happiness():
     global class_names
     global df_train
     global loaded_model_rf
-    # noaa = pd.read_pickle('Data/noaa_source_data.pkl')
-    # X= noaa["DAMAGE_PROPERTY"]
-    # y= noaa["STATE"]
-    # ff_noaa = pd.read_pickle('Data/imputed_NOAA_df.pkl')
+    global loaded_model_xgb
     ff_noaa = pd.read_pickle('Data/cleaned_NAN_removed.pkl')
-    X = ff_noaa["DAMAGE_PROPERTY"]
+    X = ff_noaa["TOTAL_DAMAGE"]
     y = ff_noaa["STATE"]
     df_train = pd.read_pickle('Data/df_train.pkl')
     loaded_model_rf = pickle.load(open('Data/RF_Model.pkl','rb'))
-    features_list = ["DURATION_OF_STORM", "DAMAGE_CROPS", "MONTH_NAME", "CZ_TYPE",
-         "EVENT_TYPE", "DEATHS_DIRECT", "DEATHS_INDIRECT", "FLOOD_CAUSE","GEO_DISTANCE","INJURIES_DIRECT",
-        "INJURIES_INDIRECT","YEAR","STATE"]
-    # class_names = ['Happy', 'Med.Happy', 'Low.Happy', 'Not.Happy']
-
+    loaded_model_xgb = pickle.load(open('Data/XGB_Model.pkl', 'rb'))
+    features_list = ["MAGNITUDE_TYPE", "WIND_SPEED", "EVENT_TYPE", "STATE",
+         "DURATION_OF_STORM", "CZ_TIMEZONE","WINDY_EVENT","YEAR","MONTH_NAME",'CZ_NAME']
 
 if __name__ == '__main__':
     #::------------------------------------
     # First reads the data then calls for the application
     #::------------------------------------
-    data_happiness()
+    data_noaa()
     main()
