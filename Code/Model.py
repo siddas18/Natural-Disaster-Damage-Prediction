@@ -2,6 +2,8 @@
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 
 # Preprocessing
 from sklearn.model_selection import train_test_split
@@ -19,7 +21,6 @@ import warnings
 warnings.catch_warnings()
 warnings.simplefilter("ignore")
 
-
 def main():
     df_train = pd.read_pickle('Data/cleaned_NAN_removed.pkl')
 
@@ -33,6 +34,14 @@ def main():
             count = count + 1
         return dict
 
+    def tor_scale(x):
+        if type(x) == float or x[-1] == 'U' or x[-1] == 'A':
+            return 0
+        else:
+            return int(x[-1]) + 1
+
+    df_train.loc[:, 'TOR_F_SCALE'] = df_train.loc[:, 'TOR_F_SCALE'].str.upper().apply(lambda x: tor_scale(x))
+
     for i in ['CZ_NAME', 'BEGIN_LOCATION', 'END_LOCATION', 'TOR_OTHER_CZ_STATE', 'TOR_OTHER_CZ_NAME']:
         unique_tag = df_train[i].value_counts().keys().values
         dict_mapping = mapping(unique_tag)
@@ -40,9 +49,9 @@ def main():
 
     df_train = pd.get_dummies(df_train,
                               prefix=['STATE', 'MONTH_NAME', 'EVENT_TYPE', 'CZ_TYPE', 'CZ_TIMEZONE', 'BEGIN_AZIMUTH',
-                                      'MAGNITUDE_TYPE', 'FLOOD_CAUSE', 'TOR_F_SCALE', 'END_AZIMUTH']
+                                      'MAGNITUDE_TYPE', 'FLOOD_CAUSE', 'END_AZIMUTH']  # 'TOR_F_SCALE',
                               , columns=['STATE', 'MONTH_NAME', 'EVENT_TYPE', 'CZ_TYPE', 'CZ_TIMEZONE', 'BEGIN_AZIMUTH',
-                                         'MAGNITUDE_TYPE', 'FLOOD_CAUSE', 'TOR_F_SCALE', 'END_AZIMUTH'])
+                                         'MAGNITUDE_TYPE', 'FLOOD_CAUSE', 'END_AZIMUTH'])  # 'TOR_F_SCALE',
 
     df_train.to_pickle('Data/df_train.pkl')
 
@@ -152,6 +161,33 @@ def main():
     plt.title("Regressor predictions and their average")
 
     plt.show()
+
+    def plot_feature_importance(importance, names, model_type):
+
+        # Create arrays from feature importance and feature names
+        feature_importance = np.array(importance)
+        feature_names = np.array(names)
+
+        # Create a DataFrame using a Dictionary
+        df = {'feature_names': feature_names, 'feature_importance': feature_importance}
+        fi_df = pd.DataFrame(df)
+
+        # Sort the DataFrame in order decreasing feature importance
+        fi_df.sort_values(by=['feature_importance'], ascending=False, inplace=True)
+
+        fi_df = fi_df[:10]
+        # Define size of bar plot
+        plt.figure(figsize=(15, 12))
+        # Plot Seaborn bar chart
+        sns.barplot(x=fi_df['feature_importance'], y=fi_df['feature_names'])
+        # Add chart labels
+        plt.title(model_type + 'FEATURE IMPORTANCE')
+        plt.xlabel('FEATURE IMPORTANCE')
+        plt.ylabel('FEATURE NAMES')
+        plt.show()
+
+    plot_feature_importance(reg_rf.feature_importances_, X_train.columns, 'RANDOM FOREST')
+    plot_feature_importance(xgb.feature_importances_, X_train.columns, 'XGBoost')
 
 
 if __name__ == '__main__':
