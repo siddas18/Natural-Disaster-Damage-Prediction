@@ -1,7 +1,6 @@
 ##################################################
-### Created by Lilian Sao de Rivera
-### Project Name : The economics of happiness
-### Date 04/23/2017
+### Created by Hemangi Kinger
+### Project Name : Natural Disaster Damage Prediction
 ### Data Mining
 ##################################################
 
@@ -33,10 +32,6 @@ import pickle
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import label_binarize
 from sklearn.metrics import mean_squared_error, r2_score
 
@@ -66,18 +61,17 @@ font_size_window = 'font-size:15px'
 
 class RandomForest(QMainWindow):
     #::--------------------------------------------------------------------------------
-    # Implementation of Random Forest Classifier using the happiness dataset
+    # Implementation of Random Forest using the happiness dataset
     # the methods in this class are
     #       _init_ : initialize the class
     #       initUi : creates the canvas and all the elements in the canvas
-    #       update : populates the elements of the canvas base on the parametes
-    #               chosen by the user
+    #       update : populates the elements of the canvas
     #::---------------------------------------------------------------------------------
     send_fig = pyqtSignal(str)
 
     def __init__(self):
         super(RandomForest, self).__init__()
-        self.Title = "Random Forest Classifier"
+        self.Title = "Random Forest "
         self.initUi()
 
     def initUi(self):
@@ -163,7 +157,7 @@ class RandomForest(QMainWindow):
 
     def update(self):
         '''
-        Random Forest Classifier
+        Random Forest
         We pupulate the dashboard using the parametres chosen by the user
         The parameters are processed to execute in the skit-learn Random Forest algorithm
           then the results are presented in graphics and reports in the canvas
@@ -171,7 +165,7 @@ class RandomForest(QMainWindow):
         '''
 
 
-        # Assign the X and y to run the Random Forest Classifier
+        # Assign the X and y to run the Random Forest
 
         X_dt = df_train.loc[:, ~df_train.columns.isin(['TOTAL_DAMAGE', 'YEAR'])]
         y_dt = df_train['TOTAL_DAMAGE']
@@ -337,7 +331,7 @@ class XGBoost(QMainWindow):
 
         # We process the parameters
 
-        # Assign the X and y to run the Random Forest Classifier
+        # Assign the X and y to run the Random Forest
 
         X_dt = df_train.loc[:, ~df_train.columns.isin(['TOTAL_DAMAGE', 'YEAR'])]
         y_dt = df_train['TOTAL_DAMAGE']
@@ -622,7 +616,7 @@ class DPGraphs(QMainWindow):
         self.ax1.clear()
         cat1 = self.dropdown1.currentText()
 
-        numerical_features = ["WIND_SPEED","DURATION_OF_STORM"]
+        numerical_features = ["DURATION_OF_STORM","WIND_SPEED"]
 
         if cat1 in numerical_features:
 
@@ -641,6 +635,24 @@ class DPGraphs(QMainWindow):
 
             self.fig.tight_layout()
             self.fig.canvas.draw_idle()
+
+        # elif cat1 in ["WIND_SPEED"]:
+        #
+        #     X_1 = ff_noaa["TOTAL_DAMAGE"]
+        #     # y_1 = ff_noaa[cat1]
+        #
+        #     X_1 = np.log(X_1)
+        #
+        #     self.ax1.scatter(X_1, y_1)
+        #
+        #     vtitle = "TOTAL_DAMAGE vrs " + cat1
+        #     self.ax1.set_title(vtitle)
+        #     self.ax1.set_xlabel("Log(TOTAL_DAMAGE)")
+        #     self.ax1.set_ylabel(cat1)
+        #     self.ax1.grid(True)
+        #
+        #     self.fig.tight_layout()
+        #     self.fig.canvas.draw_idle()
 
         elif cat1 in ['MONTH_NAME','YEAR']:
 
@@ -832,10 +844,10 @@ class App(QMainWindow):
         MLModel1Button.triggered.connect(self.XGBoost)
 
         #::------------------------------------------------------
-        # Random Forest Classifier
+        # Random Forest
         #::------------------------------------------------------
-        MLModel2Button = QAction(QIcon(), 'Random Forest Classifier', self)
-        MLModel2Button.setStatusTip('Random Forest Classifier ')
+        MLModel2Button = QAction(QIcon(), 'Random Forest', self)
+        MLModel2Button.setStatusTip('Random Forest ')
         MLModel2Button.triggered.connect(self.MLRF)
 
         MLModelMenu.addAction(MLModel1Button)
@@ -895,7 +907,7 @@ class App(QMainWindow):
 
     def MLRF(self):
         #::-------------------------------------------------------------
-        # This function creates an instance of the Random Forest Classifier Algorithm
+        # This function creates an instance of the Random Forest Algorithm
         # using the happiness dataset
         #::-------------------------------------------------------------
         dialog = RandomForest()
