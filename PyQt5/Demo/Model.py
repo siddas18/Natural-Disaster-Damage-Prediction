@@ -95,7 +95,7 @@ pickle.dump(reg_rf, open('Data/RF_Model.pkl', 'wb'))
 
 # Model 3 - XGBoost
 
-xgb = XGBRegressor(learning_rate=0.01, subsample=0.7, max_depth=5, n_estimators=100, colsample_bytree=0.8)
+xgb = XGBRegressor(learning_rate=0.01, subsample=0.7, max_depth=5, n_estimators=500, colsample_bytree=0.8)
 xgb.fit(X_train, y_train, eval_set=[(X_train, y_train)])
 
 # make predictions for test data

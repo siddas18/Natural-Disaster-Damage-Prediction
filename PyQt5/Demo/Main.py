@@ -192,10 +192,10 @@ class RandomForest(QMainWindow):
         self.ff_mse = mean_squared_error(y_pred,y_test)
         self.txtMSE.setText(str(self.ff_mse))
 
-        self.ff_trv = (loaded_model_rf.score(X_train, y_train)*100)
+        self.ff_trv = round((loaded_model_rf.score(X_train, y_train)*100),2)
         self.txtTRV.setText(str(self.ff_trv))
 
-        self.ff_tsv = (r2_score(y_test, y_pred) * 100)
+        self.ff_tsv = round((r2_score(y_test, y_pred) * 100),2)
         self.txtTSV.setText(str(self.ff_tsv))
 
 
@@ -353,10 +353,10 @@ class XGBoost(QMainWindow):
         self.ff_mse = mean_squared_error(y_pred, y_test)
         self.txtMSE.setText(str(self.ff_mse))
 
-        self.ff_trv = (loaded_model_xgb.score(X_train, y_train) * 100)
+        self.ff_trv = round((loaded_model_xgb.score(X_train, y_train) * 100),2)
         self.txtTRV.setText(str(self.ff_trv))
 
-        self.ff_tsv = (r2_score(y_test, y_pred) * 100)
+        self.ff_tsv = round((r2_score(y_test, y_pred) * 100),2)
         self.txtTSV.setText(str(self.ff_tsv))
 
         ######################################
@@ -546,7 +546,8 @@ class CorrelationPlot(QMainWindow):
         vsticks1 = list(list_corr_features.columns)
         vsticks1 = vsticks + vsticks1
         res_corr = list_corr_features.corr(method ='kendall')
-        self.ax1.matshow(res_corr, cmap= plt.cm.get_cmap('Blues', 14), interpolation='nearest')
+        caxes = self.ax1.matshow(res_corr, cmap= plt.cm.get_cmap('Blues', 14), interpolation='nearest')
+        self.fig.colorbar(caxes)
         self.ax1.set_xticks(np.arange(len(vsticks1[1:])))
         self.ax1.set_yticks(np.arange(len(vsticks1[1:])))
         self.ax1.set_yticklabels(vsticks1[1:])
@@ -621,7 +622,7 @@ class DPGraphs(QMainWindow):
         self.ax1.clear()
         cat1 = self.dropdown1.currentText()
 
-        numerical_features = ["WIND_SPEED", "DURATION_OF_STORM","WINDY_EVENT"]
+        numerical_features = ["WIND_SPEED","DURATION_OF_STORM"]
 
         if cat1 in numerical_features:
 
@@ -630,23 +631,11 @@ class DPGraphs(QMainWindow):
 
             X_1 = np.log(X_1)
 
-            # if cat1 in ['DAMAGE_CROPS']:
-            #     y_1 = np.log(y_1)
-
             self.ax1.scatter(X_1,y_1)
-
-            # if self.checkbox1.isChecked():
-            #
-            #     X_1.dropna(inplace=True)
-            #     y_1.dropna(inplace=True)
-            #
-            #     b, m = polyfit(X_1, y_1, 1)
-            #
-            #     self.ax1.plot(X_1, b + m * X_1, '-', color="orange")
 
             vtitle = "TOTAL_DAMAGE vrs "+ cat1
             self.ax1.set_title(vtitle)
-            self.ax1.set_xlabel("TOTAL_DAMAGE")
+            self.ax1.set_xlabel("Log(TOTAL_DAMAGE)")
             self.ax1.set_ylabel(cat1)
             self.ax1.grid(True)
 
@@ -658,6 +647,9 @@ class DPGraphs(QMainWindow):
             df_1 = ff_noaa[[cat1, 'TOTAL_DAMAGE']]
             df_1 = df_1.groupby(cat1).sum().reset_index()
             df_1["TOTAL_DAMAGE"] = np.log(df_1["TOTAL_DAMAGE"])
+            if cat1 == 'MONTH_NAME':
+                order_index =[4, 3, 7, 0, 8, 6, 5, 1, 11, 10, 9, 2]
+                df_1 = df_1.reindex(order_index)
             # df_1 = df_1.sort_values(by=['TOTAL_DAMAGE'], ascending=False)
             X_1 = df_1["TOTAL_DAMAGE"]
             y_1 = df_1[cat1]
@@ -667,11 +659,31 @@ class DPGraphs(QMainWindow):
             vtitle = "TOTAL_DAMAGE vrs " + cat1
             self.ax1.set_title(vtitle)
             self.ax1.set_xlabel(cat1)
-            self.ax1.set_ylabel("TOTAL_DAMAGE")
+            self.ax1.set_ylabel("Log(TOTAL_DAMAGE)")
             self.ax1.grid(True)
 
             self.fig.tight_layout()
             self.fig.canvas.draw_idle()
+        #
+        # elif cat1 in ["WIND_SPEED","DURATION_OF_STORM"]:
+        #
+        #     df_1 = ff_noaa[[cat1, 'TOTAL_DAMAGE']]
+        #     # df_1 = df_1.groupby(cat1).sum().reset_index()
+        #     # df_1["TOTAL_DAMAGE"] = np.log(df_1["TOTAL_DAMAGE"])
+        #     # df_1 = df_1.sort_values(by=['TOTAL_DAMAGE'], ascending=False)
+        #     X_1 = df_1["TOTAL_DAMAGE"]
+        #     y_1 = df_1[cat1]
+        #
+        #     self.ax1.bar(x=y_1, height=X_1)
+        #
+        #     vtitle = "TOTAL_DAMAGE vrs " + cat1
+        #     self.ax1.set_title(vtitle)
+        #     self.ax1.set_xlabel(cat1)
+        #     self.ax1.set_ylabel("TOTAL_DAMAGE")
+        #     self.ax1.grid(True)
+        #
+        #     self.fig.tight_layout()
+        #     self.fig.canvas.draw_idle()
 
         else:
 
@@ -680,14 +692,17 @@ class DPGraphs(QMainWindow):
             df_1["TOTAL_DAMAGE"] = np.log(df_1["TOTAL_DAMAGE"])
             df_1 = df_1.sort_values(by=['TOTAL_DAMAGE'],ascending=False)
             X_1 = df_1["TOTAL_DAMAGE"][:10]
-            y_1 = df_1[cat1][:10]
+            if cat1 in ['WINDY_EVENT']:
+                y_1 = [0,1]
+            else:
+                y_1 = df_1[cat1][:10]
 
             self.ax1.bar(x =  y_1, height = X_1)
 
             vtitle = "TOTAL_DAMAGE vrs " + cat1
             self.ax1.set_title(vtitle)
             self.ax1.set_xlabel(cat1)
-            self.ax1.set_ylabel("TOTAL_DAMAGE")
+            self.ax1.set_ylabel("Log(TOTAL_DAMAGE)")
             self.ax1.grid(True)
 
             self.fig.tight_layout()
