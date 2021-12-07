@@ -1,1 +1,0 @@
-# Natural Disaster Damage Prediction
